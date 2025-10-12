@@ -1,4 +1,4 @@
-import type { HoaContext } from 'hoa'
+import type { HoaMiddleware } from 'hoa'
 
 export type EncodingType = 'gzip' | 'deflate'
 
@@ -7,8 +7,6 @@ export type CompressionOptions = {
   threshold?: number
 }
 
-export type CompressMiddleware = (ctx: HoaContext, next: () => Promise<void>) => Promise<void>
-
-export function compress(options?: CompressionOptions): CompressMiddleware
+export function compress(options?: CompressionOptions): HoaMiddleware
 
 export default compress
