@@ -21,7 +21,7 @@ importers:
         specifier: 16.4.0
         version: 16.4.0
       hoa:
-        specifier: 0.1.0
+        specifier: '*'
         version: 0.1.0
       husky:
         specifier: 9.1.7

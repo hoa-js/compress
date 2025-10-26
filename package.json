@@ -1,6 +1,6 @@
 {
   "name": "@hoajs/compress",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "Compress middleware for Hoa.",
   "main": "./dist/cjs/compress.js",
   "type": "module",
