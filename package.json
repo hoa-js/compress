@@ -1,17 +1,17 @@
 {
   "name": "@hoajs/compress",
-  "version": "0.1.1",
+  "version": "0.1.2",
   "description": "Compress middleware for Hoa.",
-  "main": "./dist/cjs/compress.js",
+  "main": "./dist/cjs/compress.cjs",
   "type": "module",
-  "module": "./dist/esm/compress.js",
+  "module": "./dist/esm/compress.mjs",
   "types": "./types/index.d.ts",
   "exports": {
     ".": {
       "types": "./types/index.d.ts",
-      "import": "./dist/esm/compress.js",
-      "require": "./dist/cjs/compress.js",
-      "default": "./dist/esm/compress.js"
+      "import": "./dist/esm/compress.mjs",
+      "require": "./dist/cjs/compress.cjs",
+      "default": "./dist/esm/compress.mjs"
     }
   },
   "files": [
@@ -21,7 +21,7 @@
   ],
   "scripts": {
     "lint": "eslint .",
-    "build": "tsup",
+    "build": "tsdown",
     "test": "node --experimental-vm-modules node_modules/jest/bin/jest.js",
     "prepublishOnly": "npm run lint && npm run test && npm run build",
     "prepare": "husky"
@@ -40,15 +40,15 @@
     "deflate"
   ],
   "devDependencies": {
-    "@commitlint/cli": "20.1.0",
-    "@commitlint/config-conventional": "20.0.0",
-    "eslint": "9.37.0",
-    "globals": "16.4.0",
+    "@commitlint/cli": "20.4.1",
+    "@commitlint/config-conventional": "20.4.1",
+    "eslint": "9.39.2",
+    "globals": "17.3.0",
     "hoa": "*",
     "husky": "9.1.7",
     "jest": "30.2.0",
     "neostandard": "0.12.2",
-    "tsup": "8.5.0"
+    "tsdown": "^0.20.3"
   },
   "peerDependencies": {
     "hoa": "*"
