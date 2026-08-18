@@ -215,6 +215,7 @@ describe('Compress Middleware for Hoa', () => {
     it('should not compress when Accept-Encoding header is missing', async () => {
       const req = new Request('http://localhost/large', { method: 'GET' })
       const res = await app.fetch(req)
+      expect(res.status).toBe(200)
       expect(res.headers.get('Content-Encoding')).toBeNull()
     })
 

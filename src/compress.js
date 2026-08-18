@@ -15,7 +15,7 @@ export const compress = (options = {}) => {
   return async function compress (ctx, next) {
     await next()
 
-    const accepted = ctx.req.get('Accept-Encoding')
+    const accepted = ctx.req.get('Accept-Encoding') || ''
     const encoding = options.encoding ?? ENCODING_TYPES.find((enc) => accepted.includes(enc))
     if (!encoding || !ctx.res.body) {
       return
