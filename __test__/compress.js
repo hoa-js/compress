@@ -255,6 +255,26 @@ describe('Compress Middleware for Hoa', () => {
       expect(res.headers.get('Content-Length')).toBe('1024')
       expect(res.headers.get('Transfer-Encoding')).toBe('chunked')
     })
+
+    it.each([
+      ['gzip;q=0, deflate;q=1', 'deflate'],
+      ['gzip;q=0', null],
+      ['GZIP', 'gzip'],
+      ['gzip;q=0.2, deflate;q=0.8', 'deflate'],
+      ['*;q=1, gzip;q=0', 'deflate'],
+      ['x-gzip-custom', null]
+    ])('should negotiate %s', async (accepted, encoding) => {
+      const app = new Hoa()
+      app.use(compress({ threshold: 0 }))
+      app.use(ctx => { ctx.res.body = 'hello' })
+      const response = await app.fetch(new Request('https://example.com/', { headers: { 'Accept-Encoding': accepted } }))
+      expect(response.headers.get('Content-Encoding')).toBe(encoding)
+      expect(response.headers.get('Vary')).toContain('Accept-Encoding')
+      if (encoding) {
+        const text = await new Response(response.body.pipeThrough(new DecompressionStream(encoding))).text()
+        expect(text).toBe('hello')
+      } else expect(await response.text()).toBe('hello')
+    })
   })
 
   describe('JSON Handling', () => {

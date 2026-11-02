@@ -1,3 +1,7 @@
+## v0.1.4 / 2026-11-02
+
+- fix: respect encoding quality values and vary uncompressed responses
+
 ## v0.1.3 / 2026-08-18
 
 - fix: crash with 500 TypeError when Accept-Encoding header is missing

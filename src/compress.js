@@ -2,6 +2,26 @@ const ENCODING_TYPES = ['gzip', 'deflate']
 const cacheControlNoTransformRegExp = /(?:^|,)\s*?no-transform\s*?(?:,|$)/i
 const COMPRESSIBLE_CONTENT_TYPE_REGEX = /^\s*(?:text\/(?!event-stream(?:[;\s]|$))[^;\s]+|application\/(?:javascript|json|xml|xml-dtd|ecmascript|dart|postscript|rtf|tar|toml|vnd\.dart|vnd\.ms-fontobject|vnd\.ms-opentype|wasm|x-httpd-php|x-javascript|x-ns-proxy-autoconfig|x-sh|x-tar|x-virtualbox-hdd|x-virtualbox-ova|x-virtualbox-ovf|x-virtualbox-vbox|x-virtualbox-vdi|x-virtualbox-vhd|x-virtualbox-vmdk|x-www-form-urlencoded)|font\/(?:otf|ttf)|image\/(?:bmp|vnd\.adobe\.photoshop|vnd\.microsoft\.icon|vnd\.ms-dds|x-icon|x-ms-bmp)|message\/rfc822|model\/gltf-binary|x-shader\/x-fragment|x-shader\/x-vertex|[^;\s]+?\+(?:json|text|xml|yaml))(?:[;\s]|$)/i
 
+function negotiateEncoding (accepted) {
+  const qualities = new Map()
+  for (const part of accepted.split(',')) {
+    const [name, ...parameters] = part.trim().toLowerCase().split(';')
+    const parameter = parameters.find(value => /^\s*q\s*=/.test(value))
+    const quality = parameter === undefined ? 1 : Number(parameter.split('=')[1])
+    qualities.set(name, Number.isFinite(quality) && quality >= 0 && quality <= 1 ? quality : 0)
+  }
+  let bestQuality = 0
+  let encoding
+  for (const candidate of ENCODING_TYPES) {
+    const quality = qualities.get(candidate) ?? qualities.get('*') ?? 0
+    if (quality > bestQuality) {
+      encoding = candidate
+      bestQuality = quality
+    }
+  }
+  return encoding
+}
+
 /**
  * Compress middleware for Hoa.
  *
@@ -16,8 +36,7 @@ export const compress = (options = {}) => {
     await next()
 
     const accepted = ctx.req.get('Accept-Encoding') || ''
-    const encoding = options.encoding ?? ENCODING_TYPES.find((enc) => accepted.includes(enc))
-    if (!encoding || !ctx.res.body) {
+    if (!ctx.res.body) {
       return
     }
 
@@ -32,6 +51,11 @@ export const compress = (options = {}) => {
     ) {
       return
     }
+
+    const vary = ctx.res.get('Vary')?.toLowerCase().split(',').map(value => value.trim()) ?? []
+    if (!vary.includes('*') && !vary.includes('accept-encoding')) ctx.res.append('Vary', 'Accept-Encoding')
+    const encoding = options.encoding ?? negotiateEncoding(accepted)
+    if (!encoding) return
 
     const body = ctx.res.body
     let readable
@@ -57,7 +81,6 @@ export const compress = (options = {}) => {
     ctx.res.body = readable.pipeThrough(stream)
     ctx.res.delete('Content-Length')
     ctx.res.set('Content-Encoding', encoding)
-    ctx.res.append('Vary', 'Accept-Encoding')
   }
 }
 
